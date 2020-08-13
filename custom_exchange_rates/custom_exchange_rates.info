@@ -1,0 +1,3 @@
+name = Custom Exchange Rates module
+description = Загрузка и хранение последнего изменения курсов валют с сайта ЦБ Рф (https://www.cbr.ru/development/SXML)
+core = 7.x

@@ -1,0 +1,136 @@
+﻿<?php
+
+/**
+ * Реализация hook_permission
+ * Обьявление прав доступа
+ *
+ * @return array - Возвращает массив разрешений
+ */
+function custom_exchange_rates_permission() {
+
+  return array(
+      'custom exchange rates administrator' => array(
+          'title' => 'Администрирование курса валют', 'description' => 'Доступ к страницам администрирования курса валют',
+      ),
+  );
+
+}
+
+
+/**
+ * Реализация hook_menu
+ * Создание новых пунктов меню
+ *
+ * @return array $items - Массив объектов пунктов меню
+ */
+function custom_exchange_rates_menu() {
+
+    $items = array();
+    $items['admin/custom_exchange_rates'] = array(
+      'access arguments' => array('custom exchange rates administrator'),
+      'page callback' => 'custom_exchange_rates_page',
+      'title' => 'Курсы валют',
+      'file' => 'pages/custom_exchange_rates.page.inc',
+      'type' => MENU_NORMAL_ITEM,
+    );
+    $items['admin/custom_exchange_rates/update'] = array(
+        'access arguments' => array('custom exchange rates administrator'),
+        'page callback' => 'custom_exchange_rates_update_rate',
+        'title' => 'Обновить курс валют',
+        'file' => 'includes/custom_exchange_rates.update.inc',
+        'type' => MENU_NORMAL_ITEM,
+    );
+    $items['admin/custom_exchange_rates/json'] = array(
+        'access arguments' => array('custom exchange rates administrator'),
+        'page callback' => 'custom_exchange_rates_json',
+        'title' => 'Сформировать отчет',
+        'file' => 'includes/custom_exchange_rates.json.inc',
+        'type' => MENU_NORMAL_ITEM,
+    );
+
+    return $items;
+
+}
+
+
+/**
+ * Обновление курса валют при каждом запуске крона
+ * Реализация hook_cron
+ */
+function custom_exchange_rates_cron() {
+
+    module_load_include('inc', 'custom_exchange_rates', 'includes/custom_exchange_rates.update');
+    custom_exchange_rates_update_rate();
+
+}
+
+
+/**
+ * Русский текст для числа
+ *
+ * @param int $num число
+ * @param string $one - строка, если число оканчивается на единицу
+ * @param string $two - строка, если число оканчивается на двойку
+ * @param string $many - строка, если множественное число
+ * @param bool|string $nothing - строка, если ничего
+ *
+ * @return string - Текст для числа
+ */
+function russian_plural($num, $one, $two, $many, $nothing = FALSE) {
+
+    $output = NULL;
+
+    if ($num == 0 && $nothing != FALSE)
+        return $nothing;
+
+    $tmp = $num;
+    if ($tmp > 14)
+        $tmp = $num % 10;
+
+    switch ($tmp) {
+
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 0:
+            $output = str_replace("%", $num, $many);
+            break;
+        case 1:
+            $output = str_replace("%", $num, $one);
+            break;
+        case 2:
+        case 3:
+        case 4:
+            $output = str_replace("%", $num, $two);
+            break;
+
+    }
+
+    return $output;
+
+}
+
+
+/**
+ * Возвращает дату последнего обновления курса валют
+ *
+ * @return array $last_update_timestamp - Дата последнего обновления курса валют
+ */
+function custom_exchange_rates_get_last_update_timestamp() {
+
+    $query = db_select('custom_exchange_rates_date', 'date');
+    $query->fields('date', array('date_value'));
+    $query->orderBy('date.date_id', 'DESC');
+    $query->range(0, 1);
+    $last_update_timestamp = $query->execute()->fetchField();
+
+    return $last_update_timestamp;
+
+}

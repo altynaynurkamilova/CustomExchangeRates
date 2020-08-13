@@ -1,0 +1,104 @@
+<?php
+
+/**
+ * Реализация hook_schema. Создание таблиц
+ * @return array массив данных таблицы
+ */
+function custom_exchange_rates_schema() {
+
+    $schema = array();
+
+    $schema['custom_exchange_rates_currency'] = array(
+        'description' => 'Валюта',
+        'fields' => array(
+            'currency_id' => array(
+                'type' => 'serial',
+                'unsigned' => TRUE,
+                'not null' => TRUE,
+                'description' => 'Идентификатор валюты',
+            ),
+            'currency_valute_id' => array(
+                'type' => 'varchar',
+                'length' => '128',
+                'description' => 'Valute ID',
+            ),
+            'currency_num_code' => array(
+                'type' => 'int',
+                'not null' => TRUE,
+                'description' => 'Num Code',
+            ),
+            'currency_char_code' => array(
+                'type' => 'varchar',
+                'length' => '128',
+                'description' => 'Char Code',
+            ),
+            'currency_nominal' => array(
+                'type' => 'int',
+                'not null' => TRUE,
+                'description' => 'Nominal',
+            ),
+            'currency_name' => array(
+                'type' => 'varchar',
+                'length' => '255',
+                'description' => 'Name',
+            ),
+
+        ),
+        'primary key' => array('currency_id'),
+        'indexes' => array('currency_id' => array('currency_id')),
+    );
+
+    $schema['custom_exchange_rates_date'] = array(
+        'description' => 'Дата курса валют',
+        'fields' => array(
+            'date_id' => array(
+                'type' => 'serial',
+                'unsigned' => TRUE,
+                'not null' => TRUE,
+                'description' => 'Идентификатор даты',
+            ),
+            'date_value' => array(
+                'type' => 'int',
+                'not null' => TRUE,
+                'description' => 'Currency date (timestamp)',
+            ),
+        ),
+        'primary key' => array('date_id'),
+        'indexes' => array('date_id' => array('date_id')),
+    );
+
+    $schema['custom_exchange_rates_rate'] = array(
+        'description' => 'Курс валют по дате',
+        'fields' => array(
+            'rate_id' => array(
+                'type' => 'serial',
+                'unsigned' => TRUE,
+                'not null' => TRUE,
+                'description' => 'Идентификатор курса валют',
+            ),
+            'currency_id' => array(
+                'type' => 'int',
+                'not null' => TRUE,
+                'description' => 'Идентификатор валюты custom_exchange_rates_currency.currency_id',
+            ),
+            'date_id' => array(
+                'type' => 'int',
+                'not null' => TRUE,
+                'description' => 'Идентификатор даты custom_exchange_rates_date.date_id',
+            ),
+            'currency_value' => array(
+                'type' => 'float',
+                'size' => 'normal',
+                'unsigned' => TRUE,
+                'not null' => TRUE,
+                'default' => 0,
+                'description' => 'Значение валюты',
+            ),
+        ),
+        'primary key' => array('rate_id'),
+        'indexes' => array('rate_id' => array('rate_id')),
+    );
+
+    return $schema;
+
+}
